@@ -19,6 +19,8 @@ app.use(cors({
     origin: [
         "http://localhost:5173",
         "http://localhost:5174",
+        "https://cms-frontend-zeta-plum.vercel.app",
+        "https://cms-admin-one-sigma.vercel.app"
     ],
     credentials: true
 }));
