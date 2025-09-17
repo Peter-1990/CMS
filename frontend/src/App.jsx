@@ -11,6 +11,7 @@ import MyAppointments from './pages/MyAppointments'
 import Appointment from './pages/Appointment'
 import Footer from './components/Footer'
 import { ToastContainer } from 'react-toastify';
+import PaymentSuccess from './pages/PaymentSuccess'
 
 const App = () => {
   return (
@@ -26,7 +27,8 @@ const App = () => {
         <Route path='/contact' element={<Contact />} />
         <Route path='/my-profile' element={<MyProfile />} />
         <Route path='/my-appointments' element={<MyAppointments />} />
-        <Route path='/appointment/:docId' element={<Appointment/>} />
+        <Route path='/appointment/:docId' element={<Appointment />} />
+        <Route path='/payment-success' element={<PaymentSuccess/>} />
       </Routes>
       <Footer/>
     </div>

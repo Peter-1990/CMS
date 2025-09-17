@@ -2,11 +2,13 @@ import React, { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../context/AppContext'
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import PaymentModal from '../components/PaymentModal'; // Import the payment modal
 
 const MyAppointments = () => {
   const { backendUrl, token, getDoctorsData } = useContext(AppContext);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedAppointment, setSelectedAppointment] = useState(null); // State for payment modal
 
   const getUserAppointments = async () => {
     try {
@@ -25,9 +27,7 @@ const MyAppointments = () => {
   }
 
   const cancelAppointment = async (appointmentId) => {
-    
     try {
-      
       const { data } = await axios.post(backendUrl + '/api/user/cancel-appointment', { appointmentId }, { headers: { token } })
       if (data.success) {
         toast.success(data.message)
@@ -36,12 +36,15 @@ const MyAppointments = () => {
       } else {
         toast.error(data.message)
       }
-
     } catch (error) {
       console.log(error);
       toast.error(error.message);
     }
+  }
 
+  const handlePaymentSuccess = () => {
+    getUserAppointments(); // Refresh appointments after successful payment
+    toast.success('Payment successful! Appointment confirmed.');
   }
 
   useEffect(() => {
@@ -153,7 +156,7 @@ const MyAppointments = () => {
                       {/* Amount */}
                       <div className="mb-4">
                         <p className="text-sm font-medium text-gray-700">Fee:</p>
-                        <p className="text-lg font-bold text-green-600">₹{item.amount || '0'}</p>
+                        <p className="text-lg font-bold text-green-600">${item.amount || '0'}</p>
                       </div>
                     </div>
                   </div>
@@ -161,7 +164,10 @@ const MyAppointments = () => {
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100 mt-4">
                     {!item.payment && !item.cancelled && (
-                      <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                      <button 
+                        onClick={() => setSelectedAppointment(item)}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                      >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                         </svg>
@@ -170,7 +176,10 @@ const MyAppointments = () => {
                     )}
                     
                     {!item.cancelled && !item.isCompleted && (
-                      <button onClick={()=>cancelAppointment(item._id)} className="flex-1 border border-red-300 text-red-600 hover:bg-red-50 font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                      <button 
+                        onClick={() => cancelAppointment(item._id)} 
+                        className="flex-1 border border-red-300 text-red-600 hover:bg-red-50 font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                      >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -191,6 +200,15 @@ const MyAppointments = () => {
               </div>
             ))}
           </div>
+        )}
+
+        {/* Payment Modal */}
+        {selectedAppointment && (
+          <PaymentModal
+            appointment={selectedAppointment}
+            onClose={() => setSelectedAppointment(null)}
+            onPaymentSuccess={handlePaymentSuccess}
+          />
         )}
       </div>
     </div>
